@@ -144,7 +144,7 @@ export default function Profile() {
         name="birthDate"
         value={formData.birthDate}
         onChange={handleChange}
-        style={styles.input}
+        style={styles.dateInput}
       />
 
       <input
@@ -232,6 +232,19 @@ const styles = {
     borderRadius: "12px",
     border: "1px solid #d1d5db",
     boxSizing: "border-box",
+  },
+  dateInput: {
+    width: "100%",
+    padding: "14px",
+    marginBottom: "14px",
+    borderRadius: "12px",
+    border: "1px solid #d1d5db",
+    boxSizing: "border-box",
+    background: "#ffffff",
+    color: "#111827",
+    fontSize: "16px",
+    WebkitAppearance: "none",
+    appearance: "none",
   },
 
   button: {
