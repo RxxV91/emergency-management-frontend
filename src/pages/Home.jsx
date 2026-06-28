@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import socket from "../services/socket";
 import API from "../services/api";
 
 // Pagina principală care afișează istoricul incidentelor utilizatorului
@@ -21,6 +22,25 @@ export default function Home() {
     };
 
     fetchIncidents();
+  }, []);
+
+  // Actualizează în timp real statusul incidentelor afișate în Activitate
+  useEffect(() => {
+    const handleStatusUpdate = (data) => {
+      setIncidents((prev) =>
+        prev.map((incident) =>
+          incident._id === data.incidentId
+            ? { ...incident, status: data.status }
+            : incident,
+        ),
+      );
+    };
+
+    socket.on("incident:status:update", handleStatusUpdate);
+
+    return () => {
+      socket.off("incident:status:update", handleStatusUpdate);
+    };
   }, []);
 
   const statusLabel = {

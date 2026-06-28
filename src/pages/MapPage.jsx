@@ -4,7 +4,7 @@ import { useToast } from "../context/ToastContext";
 import { useSearchParams } from "react-router-dom";
 import L from "leaflet";
 import API from "../services/api";
-
+import socket from "../services/socket";
 import {
   MapContainer,
   TileLayer,
@@ -88,6 +88,32 @@ export default function MapPage() {
     return () => clearInterval(interval);
   }, [draftIncident]);
 
+  // Actualizează locația live pentru incidentele SOS afișate pe hartă
+  useEffect(() => {
+    const handleLiveLocation = (data) => {
+      setIncidents((prev) =>
+        prev.map((incident) =>
+          incident._id === data.incidentId
+            ? {
+                ...incident,
+                liveLocation: {
+                  latitude: data.latitude,
+                  longitude: data.longitude,
+                  updatedAt: data.updatedAt,
+                },
+              }
+            : incident,
+        ),
+      );
+    };
+
+    socket.on("sos:location:update", handleLiveLocation);
+
+    return () => {
+      socket.off("sos:location:update", handleLiveLocation);
+    };
+  }, []);
+
   const submitIncident = async (latitude, longitude) => {
     if (!draftIncident) return;
 
@@ -170,7 +196,12 @@ export default function MapPage() {
 
         if (selectedIncident) {
           map.setView(
-            [selectedIncident.latitude, selectedIncident.longitude],
+            [
+              selectedIncident.liveLocation?.latitude ||
+                selectedIncident.latitude,
+              selectedIncident.liveLocation?.longitude ||
+                selectedIncident.longitude,
+            ],
             17,
           );
           return;
@@ -236,7 +267,10 @@ export default function MapPage() {
           .map((incident) => (
             <Marker
               key={incident._id}
-              position={[incident.latitude, incident.longitude]}
+              position={[
+                incident.liveLocation?.latitude || incident.latitude,
+                incident.liveLocation?.longitude || incident.longitude,
+              ]}
               icon={getMarkerIcon(incident.type)}
             >
               <Popup>

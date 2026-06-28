@@ -13,8 +13,14 @@ function DashboardMapController({ selectedIncident }) {
   useEffect(() => {
     if (!selectedIncident) return;
 
-    const lat = Number(selectedIncident.latitude);
-    const lng = Number(selectedIncident.longitude);
+    // Dacă incidentul are locație live, harta se centrează pe coordonatele actualizate
+    const lat = Number(
+      selectedIncident.liveLocation?.latitude || selectedIncident.latitude,
+    );
+
+    const lng = Number(
+      selectedIncident.liveLocation?.longitude || selectedIncident.longitude,
+    );
 
     map.flyTo([lat, lng], 17, {
       animate: true,
